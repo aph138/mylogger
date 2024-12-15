@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// pre-definend levels
+// pre-defined levels
 const (
 	Info = iota
 	Debug
@@ -16,12 +16,12 @@ const (
 	Critical
 )
 
-// Logger defines Logger strcutrue
+// Logger defines Logger structure
 type Logger struct {
-	ErrWriter  io.Writer
-	InfoWriter io.Writer
-	Handler    Handler
-	Verbose    bool
+	errWriter  io.Writer
+	infoWriter io.Writer
+	handler    Handler
+	verbose    bool
 }
 
 // New returns a new Logger
@@ -30,10 +30,10 @@ type Logger struct {
 // InfoWriter=os.Stdout and Verbose=false
 func New(handler Handler, opts ...Option) *Logger {
 	l := &Logger{
-		ErrWriter:  os.Stderr,
-		InfoWriter: os.Stdout,
-		Handler:    handler,
-		Verbose:    false,
+		errWriter:  os.Stderr,
+		infoWriter: os.Stdout,
+		handler:    handler,
+		verbose:    false,
 	}
 	for _, o := range opts {
 		o(l)
@@ -57,60 +57,59 @@ func (l *Logger) Log(level int, content string, prefix string) {
 	switch level {
 	case Info:
 		m.Level = "Info"
-		l.InfoWriter.Write(l.Handler.Handle(m))
+		l.infoWriter.Write(l.handler.Handle(m))
 	case Debug:
 		m.Level = "Debug"
-		//check for verbosity
-		if l.Verbose {
-			l.InfoWriter.Write(l.Handler.Handle(m))
+		if l.verbose { //check for verbosity
+			l.infoWriter.Write(l.handler.Handle(m))
 		}
 	case Error:
 		m.Level = "Error"
-		l.ErrWriter.Write(l.Handler.Handle(m))
+		l.errWriter.Write(l.handler.Handle(m))
 	case Critical:
 		m.Level = "Critical"
-		l.InfoWriter.Write(l.Handler.Handle(m))
-		//exit app with error status code
-		os.Exit(1)
+		l.infoWriter.Write(l.handler.Handle(m))
+		os.Exit(1) //exit app with error status code
 	default:
 		m.Level = fmt.Sprintf("Unkown %d", level)
-		l.InfoWriter.Write(l.Handler.Handle(m))
+		l.infoWriter.Write(l.handler.Handle(m))
 	}
 
 }
 
 // Info uses InfoWriter
-func (l *Logger) Info(c string) {
-	l.Log(Info, c, "")
+// Info uses InfoWriter
+func (l *Logger) Info(p string, args ...any) {
+	l.Log(Info, fmt.Sprintf(p, args...), "")
 }
 
 // Debug use InfoWriter
 //
 // Debug only logs if you pass WithVerbosity when you're making new Logger
 // or when Verbose is true.
-func (l *Logger) Debug(c string) {
-	l.Log(Debug, c, "")
+func (l *Logger) Debug(p string, args ...any) {
+	l.Log(Debug, fmt.Sprintf(p, args...), "")
 }
 
 // Error uses ErrWriter
-func (l *Logger) Error(c string) {
-	l.Log(Error, c, "")
+func (l *Logger) Error(p string, args ...any) {
+	l.Log(Error, fmt.Sprintf(p, args...), "")
 }
 
 // Critical uses ErrWriter
 //
 // Critical will log the given content and then close the app
-func (l *Logger) Critical(c string) {
-	l.Log(Critical, c, "")
+func (l *Logger) Critical(p string, args ...any) {
+	l.Log(Critical, fmt.Sprintf(p, args...), "")
 }
 
 // ErrorWithPrefix generates a random prefix and returns it.
 // It can be useful for returning HTTP error to user, when you
 // want to track the error but don't want to show user critical information
 // with error.
-func (l *Logger) ErrorWithPrefix(c string) string {
-	p := generateRandomString(5) + fmt.Sprint(time.Now().Unix())
-	l.Log(Error, c, p)
+func (l *Logger) ErrorWithPrefix(p string, args ...any) string {
+	c := generateRandomString(5) + fmt.Sprint(time.Now().Unix())
+	l.Log(Error, fmt.Sprintf(p, args...), c)
 	return p
 }
 
