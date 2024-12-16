@@ -110,7 +110,7 @@ func (l *Logger) Critical(p string, args ...any) {
 func (l *Logger) ErrorWithPrefix(p string, args ...any) string {
 	c := generateRandomString(5) + fmt.Sprint(time.Now().Unix())
 	l.Log(Error, fmt.Sprintf(p, args...), c)
-	return p
+	return c
 }
 
 const RandomStringSeed = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#-_."
