@@ -68,11 +68,11 @@ func (l *Logger) Log(level int, content string, prefix string) {
 		l.errWriter.Write(l.handler.Handle(m))
 	case Critical:
 		m.Level = "Critical"
-		l.infoWriter.Write(l.handler.Handle(m))
+		l.errWriter.Write(l.handler.Handle(m))
 		os.Exit(1) //exit app with error status code
 	default:
 		m.Level = fmt.Sprintf("Unkown %d", level)
-		l.infoWriter.Write(l.handler.Handle(m))
+		l.errWriter.Write(l.handler.Handle(m))
 	}
 
 }
